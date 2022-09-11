@@ -8,25 +8,25 @@ import {IntersectionFieldType} from "../../src/controllers/enums";
 describe('all airtable tests',  () => {
 
     const fieldMapping = [{
-        ENTRY_NAME: 'pkey',
-        AIRTABLE: 'pkey',
-        DATA_TYPE: IntersectionFieldType.number
+        entryName: 'pkey',
+        airtable: 'pkey',
+        dataType: IntersectionFieldType.number
     }, {
-        ENTRY_NAME: 'name',
-        AIRTABLE: 'name',
-        DATA_TYPE: IntersectionFieldType.string
+        entryName: 'name',
+        airtable: 'name',
+        dataType: IntersectionFieldType.string
     },{
-        ENTRY_NAME: 'boolean_entry_name',
-        AIRTABLE: 'boolean_airtable',
-        DATA_TYPE: IntersectionFieldType.checkbox
+        entryName: 'boolean_entry_name',
+        airtable: 'boolean_airtable',
+        dataType: IntersectionFieldType.checkbox
     }, {
-        ENTRY_NAME: 'formula_entry_name',
-        AIRTABLE: 'formula_airtable',
-        DATA_TYPE: IntersectionFieldType.formula
+        entryName: 'formula_entry_name',
+        airtable: 'formula_airtable',
+        dataType: IntersectionFieldType.formula
     },{
-        ENTRY_NAME: 'lookup',
-        AIRTABLE: 'lookup',
-        DATA_TYPE: IntersectionFieldType.lookup
+        entryName: 'lookup',
+        airtable: 'lookup',
+        dataType: IntersectionFieldType.lookup
     }];
 
     test('createComparableAirtableRecord creates a comparable entity and parses string numbers and turns missing booleans into false', async () => {

@@ -4,9 +4,9 @@ import {
     createComparableAirtableRecord,
     getAllAirtableRecords,
     pushToAirtableForGivenFieldMapping
-} from "./airtable";
-import {utilPrint} from "../utils/print";
-import {MILLISECONDS_PER_HOUR} from "../utils/time";
+} from "./airtable.js";
+import {utilPrint} from "../utils/print.js";
+import {MILLISECONDS_PER_HOUR} from "../utils/time.js";
 
 export enum DataSourceType {
     airtable = 'airtable',
@@ -22,8 +22,8 @@ export interface DataSource {
     configuration: {
         writable: boolean | undefined;
     }
-    connection_details: {
-        lookBackPeriodInMS: number;
+    connectionDetails: {
+        lookBackPeriodInMS?: number;
         baseId: string;
         tableId: string;
         apiKey: string;
@@ -35,15 +35,16 @@ export async function getDataMapGivenDataSource(lookBackPeriodInMilliseconds: nu
     let result = new Map();
     switch (dataSource.type) {
         case DataSourceType.airtable: {
-            const airtableData = dataSource.connection_details
+            const airtableData = dataSource.connectionDetails
 
             const airtableLookBackPeriod = lookBackPeriodInMilliseconds ?? (airtableData?.lookBackPeriodInMS ? (airtableData?.lookBackPeriodInMS / MILLISECONDS_PER_HOUR) : undefined);
             const returnFieldsByFieldId = airtableData.returnFieldsByFieldId;
-            utilPrint({
+           
+            /* utilPrint({
                 airtableLookBackPeriod,
                 lookBackPeriodInMilliseconds,
-                airtable_look_back_period_in_ms: airtableData?.lookBackPeriodInMS
-            })
+                airtableLookBackPeriodInMS: airtableData?.lookBackPeriodInMS
+            }) */
 
             if (!(airtableData?.baseId) || !(airtableData?.tableId) || !(airtableData?.apiKey)) {
                 throw new Error(`missing base_id (${airtableData?.baseId}) or table_id (${airtableData?.tableId}) or api_key ${airtableData?.apiKey} for airtable`);
@@ -65,11 +66,11 @@ export async function getDataMapGivenDataSource(lookBackPeriodInMilliseconds: nu
     })
 }
 
-export async function getComparableRecord(source: DataSourceType, sourceRecord: any, FIELD_MAPPING: IFieldMapping[]): Promise<Map<string, AirtableObject>> {
+export async function getComparableRecord(source: DataSourceType, sourceRecord: any, fieldMapping: IFieldMapping[]): Promise<Map<string, AirtableObject>> {
     let result = new Map();
     switch (source) {
         case DataSourceType.airtable: {
-            result = await createComparableAirtableRecord(sourceRecord, FIELD_MAPPING);
+            result = await createComparableAirtableRecord(sourceRecord, fieldMapping);
             break;
         }
         case DataSourceType.postgres: {
@@ -89,11 +90,10 @@ export async function pushToDataSource(comparableCollection: any, recordId: stri
     if (dataSource.configuration.writable) {
         switch (dataSource.type) {
             case DataSourceType.airtable: {
-                const airtableData = dataSource.connection_details
+                const airtableData = dataSource.connectionDetails
                 if (!(airtableData?.baseId) || !(airtableData?.tableId) || !(airtableData?.apiKey)) {
                     throw new Error(`missing base_id (${airtableData?.baseId}) or table_id (${airtableData?.tableId}) or AIRTABLE_API_KEY for airtable`);
                 }
-
                 await pushToAirtableForGivenFieldMapping(comparableCollection, fieldMapping, airtableData.baseId, airtableData.tableId, airtableData?.apiKey, recordId);
                 break;
             }

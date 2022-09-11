@@ -2,7 +2,6 @@ import {
     IntersectionFieldType,
     IFieldMapping,
 } from "./enums.js";
-import axios from "axios";
 import {Optional} from "typescript-optional";
 import airtable from "airtable";
 import {utilPrint} from "../utils/print.js";
@@ -36,7 +35,7 @@ export const getAllAirtableRecords = async (apiKey: string, baseId: string, tabl
         .select(params)
         .all()
 
-    records.forEach(await async function (record) {
+    records.forEach(function (record) {
         airtableMap.set(record.id, record.fields)
     });
 
@@ -47,12 +46,10 @@ export const getAllAirtableRecords = async (apiKey: string, baseId: string, tabl
 
 export const createAirtableUpdateFieldsGivenFieldMapping = async (record: any, fieldMapping: IFieldMapping[]): Promise<any> => {
     const payloadToAirtable = {}
-
     Object.entries(fieldMapping).forEach(([entry, fieldMappingValue]) => {
-        const key = fieldMappingValue.ENTRY_NAME;
-        const newKey = fieldMappingValue.AIRTABLE;
-        const dataType = fieldMappingValue.DATA_TYPE;
-
+        const key = fieldMappingValue.entryName;
+        const newKey = fieldMappingValue.airtable;
+        const dataType = fieldMappingValue.dataType;
         if (key && newKey && dataType && dataType !== IntersectionFieldType.formula && dataType !== IntersectionFieldType.lookup && dataType !== IntersectionFieldType.attachment) {
             _.set(payloadToAirtable, newKey, record[key])
         }
@@ -81,9 +78,9 @@ export const createComparableAirtableRecord = async (sourceAirtable: any, fieldM
     }
 
     Object.entries(fieldMapping).forEach(([, fieldMappingValue]) => {
-        const key = fieldMappingValue.AIRTABLE;
-        const newKey = fieldMappingValue.ENTRY_NAME;
-        const fieldType = fieldMappingValue.DATA_TYPE
+        const key = fieldMappingValue.airtable;
+        const newKey = fieldMappingValue.entryName;
+        const fieldType = fieldMappingValue.dataType
 
         if (!key || !newKey) {
             throw new Error('Missing Airtable Key');
@@ -159,10 +156,16 @@ export const createComparableAirtableRecord = async (sourceAirtable: any, fieldM
     })
 }
 
-export async function mutateAirtableRecord(event: { id?: any; }, airtableAction: AirtableAction, airtableRecordId: Optional<string>, baseId: string, tableName: string, apiKey: string): Promise<string> {
+export async function mutateAirtableRecord(data: {id?: any}, airtableAction: AirtableAction, airtableRecordId: Optional<string>, baseId: string, tableName: string, apiKey: string): Promise<string> {
+    const base = new airtable({apiKey: apiKey}).base(baseId);
     switch (airtableAction) {
         case AirtableAction.CREATE: {
-            const create_response = await axios({
+            const createResponse = await base(tableName).create(data, {typecast: true})
+                .catch(e => {
+                    utilPrint({e})
+                })
+            /* refactor axios call into lib method call
+            const createResponse = await axios({
                 url: `https://api.airtable.com/v0/${baseId}/${tableName}`,
                 method: 'post',
                 headers: {
@@ -176,30 +179,28 @@ export async function mutateAirtableRecord(event: { id?: any; }, airtableAction:
             }).catch(e => {
                 utilPrint({e})
                 return;
-            });
-            if (create_response && create_response.data) {
+            }); */
+            if (createResponse) {
                 return new Promise(resolve => {
-                    resolve(create_response.data.id);
+                    resolve(createResponse?.getId());
                 })
             }
-            return new Promise(resolve => resolve(event.id!))
+            return new Promise(resolve => resolve(data.id!))
         }
         case AirtableAction.UPDATE: {
-            const base = new airtable({apiKey: apiKey}).base(baseId);
-
-            const update_response = await base(tableName).update(airtableRecordId.orElseThrow(() => {
+            const updateResponse = await base(tableName).update(airtableRecordId.orElseThrow(() => {
                 throw new Error('SHOULD NOT HAVE NULL AIRTABLE ID')
-            }), event, {typecast: true})
+            }), data, {typecast: true})
                 .catch(e => {
                     utilPrint({e})
                 })
 
-            if (update_response?.id) {
+            if (updateResponse?.id) {
                 return new Promise(resolve => {
-                    resolve(update_response?.id);
+                    resolve(updateResponse?.id);
                 })
             }
-            return new Promise(resolve => resolve(event.id!))
+            return new Promise(resolve => resolve(data.id!))
         }
     }
 }
@@ -209,8 +210,8 @@ export async function pushToAirtableForGivenFieldMapping(comparableCollection: a
         utilPrint({apiKey, baseId, tableId})
         throw new Error("missing base id or table id");
     }
-
     const payloadToAirtable = await createAirtableUpdateFieldsGivenFieldMapping(comparableCollection, fieldMapping);
+    utilPrint({payloadToAirtable})
     let maybeAirtableRecordId: Optional<string> = Optional.ofNullable(airtableRecordId)
     if (maybeAirtableRecordId.isPresent()) {
         maybeAirtableRecordId = Optional.ofNullable(await mutateAirtableRecord(payloadToAirtable, AirtableAction.UPDATE, maybeAirtableRecordId, baseId, tableId, apiKey));
