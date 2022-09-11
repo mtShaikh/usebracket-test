@@ -23,7 +23,7 @@ export enum MutationType {
     upsert = 'UPSERT',
 }
 
-/* updated field names to match json */
+/* updated field names to match json convention */
 export interface IFieldMapping {
     airtable?: string;
     entryName: string;

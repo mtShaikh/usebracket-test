@@ -1,9 +1,10 @@
-import { getObjectArray, getSheetsObj } from "../controllers/sheets.js";
+import { getArray } from "../controllers/sheets.js";
+import { getSheetsObj } from "../lib/sheets.js";
 
 async function run() {
     const sheet = await getSheetsObj()
     
-    console.log(await getObjectArray(sheet, "1ocf3nVE_miILspYdhykstRwyGIT_60zwaINYzVDbeck","A1:C1"))
+    console.log(await getArray(sheet, "1ocf3nVE_miILspYdhykstRwyGIT_60zwaINYzVDbeck","Sheet1"))
 }
 
 run().then(() => {

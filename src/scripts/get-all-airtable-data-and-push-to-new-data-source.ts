@@ -7,6 +7,7 @@ import {
     getDataMapGivenDataSource,
 } from "../controllers/data-sources.js";
 import {IntersectionFieldType} from "../controllers/enums.js";
+import { getSheetsObj } from "../lib/sheets.js";
 
 const ARG_API_KEY = 'apiKey'
 const ARG_BASE_ID = 'baseId'
@@ -21,13 +22,13 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
         },
         connectionDetails: {
             lookBackPeriodInMS: lookbackPeriod,
-            baseId: baseId,
-            tableId: tableId,
-            apiKey: apiKey,
+            base: baseId,
+            table: tableId,
+            passwordOrKey: apiKey,
             returnFieldsByFieldId: false,
         }
     }
-    const outputDataSource = {
+    /* const outputDataSource = {
         type: DataSourceType.airtable,
         configuration: {
             writable: true,
@@ -39,7 +40,23 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
             apiKey: apiKey,
             returnFieldsByFieldId: false,
         }
+    } */
+
+    const sheetObj = await getSheetsObj()
+
+    const outputDataSource = {
+        type: DataSourceType.sheets,
+        configuration: {
+            writable: true,
+        },
+        connectionDetails: {
+            spreadsheet: sheetObj,
+            passwordOrKey: "",
+            table: "1ocf3nVE_miILspYdhykstRwyGIT_60zwaINYzVDbeck",
+            sheet: "Sheet1"
+        }
     }
+
     const fieldMapping = [{
         entryName: 'Status',
         airtable: 'Status',
@@ -66,11 +83,10 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
         }
 
         // 3. write back to a new data source
-        for (const [key, value] of reformattedRecords) {
-            // TODO: Push each record to data source (in this example, we're writing to postgres)
-            // what is the comparable collection field????
-            await pushToDataSource(value, undefined, fieldMapping, outputDataSource)
-        }
+        // for (const [key, value] of reformattedRecords) {
+        // }
+        // TODO: Push each record to data source (in this example, we're writing to postgres)
+        await pushToDataSource(reformattedRecords, undefined, fieldMapping, outputDataSource)
 
         // utilPrint({airtableRecords})
         return true;
