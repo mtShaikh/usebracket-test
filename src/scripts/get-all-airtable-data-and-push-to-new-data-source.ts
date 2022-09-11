@@ -20,11 +20,11 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
             writable: false,
         },
         connection_details: {
-            look_back_period_in_ms: lookbackPeriod,
-            base_id: baseId,
-            table_id: tableId,
-            api_key: apiKey,
-            return_fields_by_field_id: false,
+            lookBackPeriodInMS: lookbackPeriod,
+            baseId: baseId,
+            tableId: tableId,
+            apiKey: apiKey,
+            returnFieldsByFieldId: false,
         }
     }
     const postgresDataSource = {
@@ -33,11 +33,11 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
             writable: true,
         },
         connection_details: {
-            look_back_period_in_ms: lookbackPeriod,
-            base_id: baseId,
-            table_id: tableId,
-            api_key: apiKey,
-            return_fields_by_field_id: false,
+            lookBackPeriodInMS: lookbackPeriod,
+            baseId: baseId,
+            tableId: tableId,
+            apiKey: apiKey,
+            returnFieldsByFieldId: false,
         }
     }
     const fieldMapping = [{

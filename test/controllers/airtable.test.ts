@@ -2,7 +2,7 @@ import {
     createAirtableUpdateFieldsGivenFieldMapping,
     createComparableAirtableRecord
 
-} from '../../src/controllers/airtable';
+} from '../../src/controllers/airtable.js';
 import {IntersectionFieldType} from "../../src/controllers/enums";
 
 describe('all airtable tests',  () => {

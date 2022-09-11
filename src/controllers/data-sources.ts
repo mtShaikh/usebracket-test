@@ -1,12 +1,12 @@
-import {IFieldMapping} from "./enums.js";
+import {IFieldMapping} from "./enums";
 import {
     AirtableObject,
     createComparableAirtableRecord,
     getAllAirtableRecords,
     pushToAirtableForGivenFieldMapping
-} from "./airtable.js";
-import {utilPrint} from "../utils/print.js";
-import {MILLISECONDS_PER_HOUR} from "../utils/time.js";
+} from "./airtable";
+import {utilPrint} from "../utils/print";
+import {MILLISECONDS_PER_HOUR} from "../utils/time";
 
 export enum DataSourceType {
     airtable = 'airtable',
@@ -14,6 +14,7 @@ export enum DataSourceType {
     postgres = 'postgres',
     notion = 'notion',
     dynamodb = 'dynamodb',
+    sheets = 'sheets'
 }
 
 export interface DataSource {
@@ -22,11 +23,11 @@ export interface DataSource {
         writable: boolean | undefined;
     }
     connection_details: {
-        look_back_period_in_ms: number;
-        base_id: string;
-        table_id: string;
-        api_key: string;
-        return_fields_by_field_id: boolean;
+        lookBackPeriodInMS: number;
+        baseId: string;
+        tableId: string;
+        apiKey: string;
+        returnFieldsByFieldId: boolean;
     }
 }
 
@@ -36,18 +37,18 @@ export async function getDataMapGivenDataSource(lookBackPeriodInMilliseconds: nu
         case DataSourceType.airtable: {
             const airtableData = dataSource.connection_details
 
-            const airtableLookBackPeriod = lookBackPeriodInMilliseconds ?? (airtableData?.look_back_period_in_ms ? (airtableData?.look_back_period_in_ms / MILLISECONDS_PER_HOUR) : undefined);
-            const returnFieldsByFieldId = airtableData.return_fields_by_field_id;
+            const airtableLookBackPeriod = lookBackPeriodInMilliseconds ?? (airtableData?.lookBackPeriodInMS ? (airtableData?.lookBackPeriodInMS / MILLISECONDS_PER_HOUR) : undefined);
+            const returnFieldsByFieldId = airtableData.returnFieldsByFieldId;
             utilPrint({
                 airtableLookBackPeriod,
                 lookBackPeriodInMilliseconds,
-                airtable_look_back_period_in_ms: airtableData?.look_back_period_in_ms
+                airtable_look_back_period_in_ms: airtableData?.lookBackPeriodInMS
             })
 
-            if (!(airtableData?.base_id) || !(airtableData?.table_id) || !(airtableData?.api_key)) {
-                throw new Error(`missing base_id (${airtableData?.base_id}) or table_id (${airtableData?.table_id}) or api_key ${airtableData?.api_key} for airtable`);
+            if (!(airtableData?.baseId) || !(airtableData?.tableId) || !(airtableData?.apiKey)) {
+                throw new Error(`missing base_id (${airtableData?.baseId}) or table_id (${airtableData?.tableId}) or api_key ${airtableData?.apiKey} for airtable`);
             }
-            result = await getAllAirtableRecords(airtableData?.api_key, airtableData?.base_id, airtableData?.table_id, airtableLookBackPeriod, returnFieldsByFieldId);
+            result = await getAllAirtableRecords(airtableData?.apiKey, airtableData?.baseId, airtableData?.tableId, airtableLookBackPeriod, returnFieldsByFieldId);
             break;
         }
         case DataSourceType.postgres: {
@@ -89,14 +90,15 @@ export async function pushToDataSource(comparableCollection: any, recordId: stri
         switch (dataSource.type) {
             case DataSourceType.airtable: {
                 const airtableData = dataSource.connection_details
-                if (!(airtableData?.base_id) || !(airtableData?.table_id) || !(airtableData?.api_key)) {
-                    throw new Error(`missing base_id (${airtableData?.base_id}) or table_id (${airtableData?.table_id}) or AIRTABLE_API_KEY for airtable`);
+                if (!(airtableData?.baseId) || !(airtableData?.tableId) || !(airtableData?.apiKey)) {
+                    throw new Error(`missing base_id (${airtableData?.baseId}) or table_id (${airtableData?.tableId}) or AIRTABLE_API_KEY for airtable`);
                 }
 
-                await pushToAirtableForGivenFieldMapping(comparableCollection, fieldMapping, airtableData.base_id, airtableData.table_id, airtableData?.api_key, recordId);
+                await pushToAirtableForGivenFieldMapping(comparableCollection, fieldMapping, airtableData.baseId, airtableData.tableId, airtableData?.apiKey, recordId);
                 break;
             }
-            case DataSourceType.postgres: {
+            case DataSourceType.sheets: {
+                /* add sheets */
                 break;
             }
             default: {
