@@ -111,3 +111,5 @@ package-lock.json
 .DS_Store
 
 .idea
+
+secret/

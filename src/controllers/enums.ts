@@ -23,8 +23,9 @@ export enum MutationType {
     upsert = 'UPSERT',
 }
 
+/* updated field names to match json convention */
 export interface IFieldMapping {
-    AIRTABLE?: string;
-    ENTRY_NAME: string;
-    DATA_TYPE?: IntersectionFieldType;
+    airtable?: string;
+    entryName: string;
+    dataType?: IntersectionFieldType;
 }
