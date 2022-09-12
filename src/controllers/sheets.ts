@@ -21,12 +21,12 @@ export async function getArray(
       throw new Error("Range is missing");
     }
     sheetsObj.spreadsheets.values.get(
-      { spreadsheetId, range },
+      { spreadsheetId, range, valueRenderOption: "FORMULA" },
       (err: Error | null, res?: GaxiosResponse<any> | null) => {
         if (!res) {
           reject();
         } else {
-          utilPrint(res.data.values);
+          utilPrint(res.data);
           err ? reject(err) : resolve(res.data.values);
         }
       }
