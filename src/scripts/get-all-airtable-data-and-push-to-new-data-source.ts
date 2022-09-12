@@ -28,19 +28,6 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
             returnFieldsByFieldId: false,
         }
     }
-    /* const outputDataSource = {
-        type: DataSourceType.airtable,
-        configuration: {
-            writable: true,
-        },
-        connectionDetails: {
-            lookBackPeriodInMS: lookbackPeriod,
-            baseId: baseId,
-            tableId: "tblyzZHExLLC4r15L",
-            apiKey: apiKey,
-            returnFieldsByFieldId: false,
-        }
-    } */
 
     const sheetObj = await getSheetsObj()
 
@@ -83,17 +70,12 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
         // 2. transform it to a data source agnostic object
         const reformattedRecords = new Map()
         for (const [key, value] of airtableRecords) {
-            // TODO: Create a data source agnostic object for each airtable object
             reformattedRecords.set(key, await getComparableRecord(DataSourceType.airtable, value, fieldMapping))
         }
 
         // 3. write back to a new data source
-        // for (const [key, value] of reformattedRecords) {
-        // }
-        // TODO: Push each record to data source (in this example, we're writing to postgres)
         await pushToDataSource(reformattedRecords, undefined, fieldMapping, outputDataSource)
 
-        // utilPrint({airtableRecords})
         return true;
     } else {
         throw new Error("MISSING ARGUMENTS")

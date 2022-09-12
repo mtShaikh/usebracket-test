@@ -48,12 +48,6 @@ export async function getDataMapGivenDataSource(
           : undefined);
       const returnFieldsByFieldId = airtableData.returnFieldsByFieldId;
 
-      /* utilPrint({
-                airtableLookBackPeriod,
-                lookBackPeriodInMilliseconds,
-                airtableLookBackPeriodInMS: airtableData?.lookBackPeriodInMS
-            }) */
-
       if (
         !airtableData?.base ||
         !airtableData?.table ||

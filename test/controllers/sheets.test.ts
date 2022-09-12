@@ -35,16 +35,6 @@ describe("all sheets tests", () => {
     expect(result).toStrictEqual(expected);
   });
 
-  /* test('pushToSheetsForGivenFieldMapping creates a header row using the field mapping', async () => {
-        const expected = ["pkey", "name", "boolean_airtable", "formula_airtable"];
-        const mockSpreadsheetId = "mock-spreadsheet"
-        const mockSheetObj = {
-            update: jest.fn().mockResolvedValue({updatedCells: 2, spreadSheetId: mockSpreadsheetId})
-        }
-        const result = await pushToSheetsForGivenFieldMapping(fieldMapping);
-        expect(result).toStrictEqual(expected);
-    }) */
-
   test("createSheetsValuesArray creates an array for all the data rows from the mapped records", async () => {
     const record = 
       {

@@ -216,22 +216,7 @@ export async function mutateAirtableRecord(
           utilPrint({ e });
           throw e
         });
-      /* refactor axios call into lib method call
-            const createResponse = await axios({
-                url: `https://api.airtable.com/v0/${baseId}/${tableName}`,
-                method: 'post',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': "application/json"
-                },
-                data: {
-                    fields: event,
-                    typecast: true
-                }
-            }).catch(e => {
-                utilPrint({e})
-                return;
-            }); */
+
       if (createResponse) {
         return new Promise((resolve) => {
           resolve(createResponse?.getId());
@@ -272,7 +257,6 @@ export async function pushToAirtableForGivenFieldMapping(
   airtableRecordId: string | undefined
 ) {
   if (!apiKey || !baseId || !tableId) {
-    // utilPrint({ apiKey, baseId, tableId });
     throw new Error("missing base id or table id");
   }
   const payloadToAirtable = await createAirtableUpdateFieldsGivenFieldMapping(
