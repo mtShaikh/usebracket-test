@@ -3,12 +3,12 @@ import { sheets_v4 } from "googleapis";
 import _ from "lodash";
 import { getUtilPrint, utilPrint } from "../utils/print.js";
 import { Connection } from "./data-sources.js";
-import { IFieldMapping } from "./enums.js";
+import { IFieldMapping, IntersectionFieldType } from "./enums.js";
 
 export interface SheetsConnection extends Connection {
   spreadsheet: sheets_v4.Sheets;
   sheet: string; // sheet name
-  headerRowId?: string; // row for the column names
+  headerRowIndex?: string; // row for the column names
 }
 
 export async function getArray(
@@ -91,7 +91,7 @@ export async function updateSingleRangeRecord(
       const result = await sheetObj.spreadsheets.values.append({
         spreadsheetId,
         range,
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: "USER_ENTERED", //move to constant
         requestBody: { values: data },
       });
       const responseData = result.data;
@@ -122,6 +122,19 @@ export async function updateSingleRangeRecord(
   }
 }
 
+export async function createSheetsValuesArray(
+  fieldMapping: IFieldMapping[],
+  record: Record<string, any>
+) {
+  const row: any[] = [];
+
+  Object.entries(fieldMapping).forEach(([entry, fieldMappingValue]) => {
+    const key = fieldMappingValue.entryName;
+    row.push(record[key] ?? null);
+  });
+  return row;
+}
+
 export async function pushToSheetsForGivenFieldMapping(
   records: Map<string, any>,
   fieldMapping: IFieldMapping[],
@@ -135,28 +148,29 @@ export async function pushToSheetsForGivenFieldMapping(
   for (const [_, record] of records) {
     formattedRecords.push(record);
   }
+  utilPrint(formattedRecords);
 
   const payload = [];
 
   payload.push(await setHeaderRowUsingFieldMapping(fieldMapping));
 
-  formattedRecords.forEach((record) => {
-    const row: any = [];
-    Object.entries(record).forEach(([_, value]) => {
-      row.push(value);
-    });
-    payload.push(row);
-  });
+  const values = [];
+  for (const record of formattedRecords) {
+    const row = await createSheetsValuesArray(fieldMapping, record);
+    values.push(row);
+  }
 
-  utilPrint({ payload });
+  const updatedPayload = payload.concat(values);
+
+  utilPrint({ updatedPayload });
+
   /* update sheet */
   const response = await updateSingleRangeRecord(
-    payload,
+    updatedPayload,
     sheetObj,
     spreadsheetId,
     sheetId,
-    range,
-    true
+    range
   );
   /* return sheet response */
   const updatedCells = response.updatedCells;

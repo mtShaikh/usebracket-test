@@ -66,9 +66,14 @@ async function getAllAirtableDataAndPushToNewDataSource(apiKey: string, baseId: 
         airtable: 'Name',
         dataType: IntersectionFieldType.string
     }, {
-        entryName: 'isOK',
+        entryName: 'isAvailable',
         airtable: 'isOK',
         dataType: IntersectionFieldType.checkbox
+    },
+    {
+        entryName: 'formula',
+        airtable: 'formula field',
+        dataType: IntersectionFieldType.formula
     }]
 
     if (apiKey && baseId && tableId) {
